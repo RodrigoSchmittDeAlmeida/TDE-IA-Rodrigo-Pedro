@@ -1,0 +1,24 @@
+RODADO O K-NN
+Distribuição das classes no Dataset Final:
+Classe_Alvo
+Jogador X venceu    200
+Jogador O venceu    200
+Tem jogo            200
+Empate               16
+Name: count, dtype: int64
+--- Abordagem 1 (Tabuleiro) ---
+Melhor parâmetro encontrado na Validação: k = 11 (Acurácia: 0.7527)
+Desempenho no Teste final:
+Acurácia: 0.7097
+Precision: 0.5273
+Recall: 0.5500
+F-Measure: 0.5366
+
+--- Abordagem 2 (Features Extraídas) ---
+Melhor parâmetro encontrado na Validação: k = 1 (Acurácia: 0.8817)
+Desempenho no Teste final:
+Acurácia: 0.9032
+Precision: 0.6871
+Recall: 0.7000
+F-Measure: 0.6880
+
