@@ -219,8 +219,8 @@ Para o k-NN, a acurácia de treino e os tempos ainda não são coletados (a fun�
 
 ## 7. Ferramentas de IA utilizadas
 
-- **Claude Code (Anthropic, modelo Claude Sonnet 5.5):** usado para ajudar a entender o código existente do k-NN, escrever a função genérica de avaliação e os algoritmos MLP, Árvore de Decisão, Random Forest e K-Means no `jogo.py`, corrigir avisos de convergência do MLP e do K-Means, fixar a seed e redigir este README.
-- Os integrantes devem revisar e dominar todo o código antes da apresentação, como o enunciado exige.
+- **Claude Code (Anthropic, modelo Claude Sonnet 5.5):** usado para ajudar a entender o trabalho, tirar dúvidas, estruturar e corrigir o relatório.
+- **Gamma IA:** usado para gerar o modelo dos slides para a apresentação do trabalho.
 
 ## 8. Pendências
 
