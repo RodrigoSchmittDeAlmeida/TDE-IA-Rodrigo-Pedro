@@ -232,3 +232,140 @@ modelo_knn_ab1 = avaliar_knn(X1_train_scaled, y_train, X1_val_scaled, y_val, X1_
 
 # Executando para a Abordagem 2 (Features estruturadas)
 modelo_knn_ab2 = avaliar_knn(X2_train_scaled, y_train, X2_val_scaled, y_val, X2_test_scaled, y_test, "Abordagem 2 (Features Extraídas)")
+
+
+
+# OUTROS ALGORITMOS (MLP, Arvore de Decisao, K-Means, Random Forest)
+
+import time
+from itertools import product
+from sklearn.neural_network import MLPClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.cluster import KMeans
+from sklearn.base import BaseEstimator, ClassifierMixin
+from sklearn.ensemble import RandomForestClassifier
+
+#k-means e nao supervisionado, entao usamos como classificador: agrupamos o treino em clusters
+#e cada cluster recebe o rotulo da classe majoritaria dos seus exemplos de treino
+class KMeansClassificador(BaseEstimator, ClassifierMixin):
+    def __init__(self, n_clusters=8, random_state=42):
+        self.n_clusters = n_clusters
+        self.random_state = random_state
+
+    def fit(self, X, y):
+        y = np.asarray(y)
+        #nao da para ter mais clusters do que pontos distintos (features discretas repetem muito)
+        n_efetivo = min(self.n_clusters, len(np.unique(X, axis=0)))
+        self.kmeans_ = KMeans(n_clusters=n_efetivo, n_init=10, random_state=self.random_state)
+        clusters = self.kmeans_.fit_predict(X)
+        self.classes_ = np.unique(y)
+        self.rotulos_ = {}
+        for c in range(n_efetivo):
+            rotulos, contagens = np.unique(y[clusters == c], return_counts=True)
+            self.rotulos_[c] = rotulos[np.argmax(contagens)] if len(rotulos) > 0 else self.classes_[0]
+        return self
+
+    def predict(self, X):
+        return np.array([self.rotulos_[c] for c in self.kmeans_.predict(X)])
+
+
+#funcao generica: testa todas as combinacoes de parametros na validacao e avalia a melhor no teste
+def avaliar_modelo(nome, construtor, grade, X_tr, y_tr, X_v, y_v, X_te, y_te, nome_abordagem):
+    nomes_params = list(grade.keys())
+    melhor_params = None
+    melhor_acuracia_val = -1
+
+    for valores in product(*grade.values()):
+        params = dict(zip(nomes_params, valores))
+        modelo_temp = construtor(**params)
+        modelo_temp.fit(X_tr, y_tr)
+        acc_val = accuracy_score(y_v, modelo_temp.predict(X_v))
+
+        if acc_val > melhor_acuracia_val:
+            melhor_acuracia_val = acc_val
+            melhor_params = params
+
+    #treina o modelo final com os melhores parametros e mede tempos de treino e predicao (custo)
+    modelo_final = construtor(**melhor_params)
+    inicio = time.time()
+    modelo_final.fit(X_tr, y_tr)
+    tempo_treino = time.time() - inicio
+
+    inicio = time.time()
+    y_pred_test = modelo_final.predict(X_te)
+    tempo_predicao = time.time() - inicio
+
+    acc_treino = accuracy_score(y_tr, modelo_final.predict(X_tr))
+    acc = accuracy_score(y_te, y_pred_test)
+    prec = precision_score(y_te, y_pred_test, average='macro', zero_division=0)
+    rec = recall_score(y_te, y_pred_test, average='macro', zero_division=0)
+    f1 = f1_score(y_te, y_pred_test, average='macro', zero_division=0)
+
+    print(f"--- {nome} | {nome_abordagem} ---")
+    print(f"Melhores parâmetros na Validação: {melhor_params} (Acurácia: {melhor_acuracia_val:.4f})")
+    print(f"Desempenho no Teste final:")
+    print(f"Acurácia treino: {acc_treino:.4f} | Acurácia teste: {acc:.4f}")
+    print(f"Precision: {prec:.4f}")
+    print(f"Recall: {rec:.4f}")
+    print(f"F-Measure: {f1:.4f}")
+    print(f"Tempo treino: {tempo_treino:.4f}s | Tempo predição: {tempo_predicao:.4f}s\n")
+
+    return modelo_final, {'algoritmo': nome, 'abordagem': nome_abordagem, 'parametros': melhor_params,
+                          'acc_val': melhor_acuracia_val, 'acc_treino': acc_treino, 'acc_teste': acc,
+                          'precision': prec, 'recall': rec, 'f1': f1,
+                          'tempo_treino': tempo_treino, 'tempo_predicao': tempo_predicao}
+
+
+# grades de parametros testados na validacao
+grade_mlp = {
+    'hidden_layer_sizes': [(8,), (16,), (32,), (16, 8), (32, 16)],
+    'activation': ['relu', 'tanh'],
+    'alpha': [0.0001, 0.01],
+    'max_iter': [5000],
+    'random_state': [42],
+}
+grade_arvore = {
+    'max_depth': [2, 3, 4, 5, 6, 8, None],
+    'min_samples_leaf': [1, 2, 5, 10],
+    'criterion': ['gini', 'entropy'],
+    'random_state': [42],
+}
+#mais clusters do que classes, pois cada classe pode ocupar varias regioes do espaco
+grade_kmeans = {
+    'n_clusters': [4, 8, 16, 32, 64, 128],
+    'random_state': [42],
+}
+grade_rf = {
+    'n_estimators': [50, 100, 200],
+    'max_depth': [3, 5, 8, None],
+    'min_samples_leaf': [1, 2, 5],
+    'random_state': [42],
+}
+
+#dados por abordagem (MLP e K-Means usam os dados normalizados; arvore e RF nao precisam de normalizacao)
+abordagens = {
+    'Abordagem 1 (Tabuleiro)': {
+        'normalizado': (X1_train_scaled, X1_val_scaled, X1_test_scaled),
+        'original': (X1_train, X1_val, X1_test),
+    },
+    'Abordagem 2 (Features Extraídas)': {
+        'normalizado': (X2_train_scaled, X2_val_scaled, X2_test_scaled),
+        'original': (X2_train, X2_val, X2_test),
+    },
+}
+
+algoritmos = [
+    ('MLP', MLPClassifier, grade_mlp, 'normalizado'),
+    ('Árvore de Decisão', DecisionTreeClassifier, grade_arvore, 'original'),
+    ('K-Means', KMeansClassificador, grade_kmeans, 'normalizado'),
+    ('Random Forest', RandomForestClassifier, grade_rf, 'original'),
+]
+
+resultados_modelos = []
+modelos_treinados = {}
+for nome_ab, dados in abordagens.items():
+    for nome_alg, construtor, grade, tipo_dado in algoritmos:
+        X_tr, X_v, X_te = dados[tipo_dado]
+        modelo, resultado = avaliar_modelo(nome_alg, construtor, grade, X_tr, y_train, X_v, y_val, X_te, y_test, nome_ab)
+        resultados_modelos.append(resultado)
+        modelos_treinados[(nome_alg, nome_ab)] = modelo
