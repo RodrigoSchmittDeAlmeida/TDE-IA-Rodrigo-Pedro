@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 import random
+
+random.seed(42)  # fixa a simulacao de "Tem jogo" para os resultados serem reproduziveis
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
