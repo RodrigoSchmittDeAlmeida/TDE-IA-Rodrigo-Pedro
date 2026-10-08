@@ -218,4 +218,6 @@ Para o k-NN, a acurácia de treino e os tempos ainda não são coletados (a fun�
 
 ## 7. Ferramentas de IA utilizadas
 
-- **Claude Code (Anthropic, modelo Claude Sonnet 5.5):** usado para ajudar a entender o escopo do trabalho, tirar dúvidas, estruturar e corrigir o relatório. E também para gerar o modelo dos slides para a apresentação do trabalho.
+- **Claude Code (Anthropic, modelo Claude Sonnet 5.5):** usado para ajudar a entender o escopo do trabalho, tirar dúvidas, estruturar e corrigir o relatório.
+
+- **Gamma IA:** usado para gerar o modelo dos slides para a apresentação do trabalho.
