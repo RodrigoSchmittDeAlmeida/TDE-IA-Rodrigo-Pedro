@@ -12,8 +12,6 @@ Sistema de IA que recebe o estado de um tabuleiro 3x3 do jogo da velha e o class
 
 A IA não joga: ela apenas verifica o estado do jogo.
 
-> **Situação do trabalho:** dataset, pré-processamento, divisão dos dados e os cinco algoritmos estão implementados e avaliados (seções 1 a 6). O front end, os gráficos, o vídeo e a conclusão final ainda estão pendentes (seção 8).
-
 ## Como executar
 
 ```bash
@@ -209,8 +207,9 @@ Para o k-NN, a acurácia de treino e os tempos ainda não são coletados (a fun�
 **Os algoritmos ficaram empatados na Abordagem 2.** A validação deu 0,8710 para os cinco, e no teste a diferença entre o melhor (MLP, 0,8925) e o pior (Random Forest, 0,8495) é de 4 pontos percentuais. Em 93 amostras isso equivale a cerca de 4 tabuleiros, o que está dentro do ruído de um conjunto de teste tão pequeno. Não dá para afirmar com segurança qual algoritmo é superior.
 
 **A classe Empate é o principal limitador das métricas.**
-- O teste tem só 3 empates. O recall e a precision macro sobem a cerca de 0,67 a 0,69, o que é compatível com um modelo que acerta bem 3 classes e erra o Empate.
-- Na Abordagem 2, um empate (tabuleiro cheio, 5 X e 4 O) tem as mesmas 7 features de uma vitória de X com tabuleiro cheio, então as features **não conseguem separá-los**. É uma limitação das features escolhidas e não do algoritmo.
+- O teste tem só 3 empates, e o **recall do Empate é 0 em todos os 10 modelos** (5 algoritmos × 2 abordagens): nenhum acerta um único empate. Como o recall macro é a média de 4 classes, com uma delas em zero ele não passa de 0,75. Isso explica o recall e a precision macro de 0,66 a 0,69 na Abordagem 2.
+- Na Abordagem 2, os modelos acertam 100% das vitórias de X e de O (recall 1,00 em todos); os erros ficam em "Tem jogo" (recall de 0,63 a 0,77) e no Empate.
+- Na Abordagem 2, um empate (tabuleiro cheio, 5 X e 4 O) tem exatamente as mesmas 7 features, `[5, 4, 9, 0, 0, 0, -1]`, de uma vitória de X com tabuleiro cheio (20 casos no dataset final), então as features **não conseguem separá-los**. É uma limitação das features escolhidas e não do algoritmo.
 - Existem apenas 42 pontos distintos no espaço de features da Abordagem 2, então muitos exemplos de teste repetem exemplos de treino. Isso pode inflar a acurácia da Abordagem 2.
 
 ### 6.4 Escolha do melhor algoritmo
@@ -219,16 +218,4 @@ Para o k-NN, a acurácia de treino e os tempos ainda não são coletados (a fun�
 
 ## 7. Ferramentas de IA utilizadas
 
-- **Claude Code (Anthropic, modelo Claude Sonnet 5.5):** usado para ajudar a entender o trabalho, tirar dúvidas, estruturar e corrigir o relatório.
-- **Gamma IA:** usado para gerar o modelo dos slides para a apresentação do trabalho.
-
-## 8. Pendências
-
-- [ ] **Front end:** jogo humano × máquina aleatória, com a IA indicando a cada jogada se há vitória, empate ou jogo em andamento. Deve contar acertos e erros e medir a acurácia durante as interações. Se a IA não detectar o fim, o jogo encerra; se detectar o fim incorretamente, continua.
-- [ ] **Gráficos comparativos** dos algoritmos e abordagens.
-- [ ] **Salvar os conjuntos** de treino, validação e teste em arquivos (CSV).
-- [ ] **Tratar o Empate:** gerar mais empates sintéticos ou rever as features, que hoje não separam Empate de X com tabuleiro cheio.
-- [ ] **Coletar acurácia de treino e tempos do k-NN** com a função genérica.
-- [ ] **Resultados do front end** (acurácia da IA nas interações reais).
-- [ ] **Relatório em PPT**, **vídeo de até 10 min** com todos os integrantes falando e **conclusão** (dificuldades e ganhos).
-- [ ] Atualizar o `resultados.txt`, que ainda mostra a execução antiga (só k-NN).
+- **Claude Code (Anthropic, modelo Claude Sonnet 5.5):** usado para ajudar a entender o escopo do trabalho, tirar dúvidas, estruturar e corrigir o relatório. E também para gerar o modelo dos slides para a apresentação do trabalho.

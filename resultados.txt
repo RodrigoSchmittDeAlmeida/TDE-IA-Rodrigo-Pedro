@@ -1,4 +1,3 @@
-RODADO O K-NN
 Distribuição das classes no Dataset Final:
 Classe_Alvo
 Jogador X venceu    200
@@ -7,18 +6,90 @@ Tem jogo            200
 Empate               16
 Name: count, dtype: int64
 --- Abordagem 1 (Tabuleiro) ---
-Melhor parâmetro encontrado na Validação: k = 11 (Acurácia: 0.7527)
+Melhor parâmetro encontrado na Validação: k = 7 (Acurácia: 0.7957)
 Desempenho no Teste final:
-Acurácia: 0.7097
-Precision: 0.5273
-Recall: 0.5500
-F-Measure: 0.5366
+Acurácia: 0.6989
+Precision: 0.5284
+Recall: 0.5417
+F-Measure: 0.5284
 
 --- Abordagem 2 (Features Extraídas) ---
-Melhor parâmetro encontrado na Validação: k = 1 (Acurácia: 0.8817)
+Melhor parâmetro encontrado na Validação: k = 3 (Acurácia: 0.8710)
 Desempenho no Teste final:
-Acurácia: 0.9032
-Precision: 0.6871
-Recall: 0.7000
-F-Measure: 0.6880
+Acurácia: 0.8817
+Precision: 0.6746
+Recall: 0.6833
+F-Measure: 0.6702
+
+--- MLP | Abordagem 1 (Tabuleiro) ---
+Melhores parâmetros na Validação: {'hidden_layer_sizes': (16,), 'activation': 'relu', 'alpha': 0.0001, 'max_iter': 5000, 'random_state': 42} (Acurácia: 0.8925)
+Desempenho no Teste final:
+Acurácia treino: 0.9465 | Acurácia teste: 0.8065
+Precision: 0.6019
+Recall: 0.6250
+F-Measure: 0.6125
+Tempo treino: 0.7601s | Tempo predição: 0.0003s
+
+--- Árvore de Decisão | Abordagem 1 (Tabuleiro) ---
+Melhores parâmetros na Validação: {'max_depth': None, 'min_samples_leaf': 1, 'criterion': 'entropy', 'random_state': 42} (Acurácia: 0.7097)
+Desempenho no Teste final:
+Acurácia treino: 1.0000 | Acurácia teste: 0.7204
+Precision: 0.5478
+Recall: 0.5583
+F-Measure: 0.5505
+Tempo treino: 0.0013s | Tempo predição: 0.0005s
+
+--- K-Means | Abordagem 1 (Tabuleiro) ---
+Melhores parâmetros na Validação: {'n_clusters': 64, 'random_state': 42} (Acurácia: 0.7097)
+Desempenho no Teste final:
+Acurácia treino: 0.7558 | Acurácia teste: 0.6237
+Precision: 0.4603
+Recall: 0.4833
+F-Measure: 0.4673
+Tempo treino: 0.0358s | Tempo predição: 0.0002s
+
+--- Random Forest | Abordagem 1 (Tabuleiro) ---
+Melhores parâmetros na Validação: {'n_estimators': 50, 'max_depth': None, 'min_samples_leaf': 2, 'random_state': 42} (Acurácia: 0.8172)
+Desempenho no Teste final:
+Acurácia treino: 0.9907 | Acurácia teste: 0.8065
+Precision: 0.6073
+Recall: 0.6250
+F-Measure: 0.6116
+Tempo treino: 0.0392s | Tempo predição: 0.0022s
+
+--- MLP | Abordagem 2 (Features Extraídas) ---
+Melhores parâmetros na Validação: {'hidden_layer_sizes': (8,), 'activation': 'relu', 'alpha': 0.0001, 'max_iter': 5000, 'random_state': 42} (Acurácia: 0.8710)
+Desempenho no Teste final:
+Acurácia treino: 0.9349 | Acurácia teste: 0.8925
+Precision: 0.6817
+Recall: 0.6917
+F-Measure: 0.6795
+Tempo treino: 0.2741s | Tempo predição: 0.0002s
+
+--- Árvore de Decisão | Abordagem 2 (Features Extraídas) ---
+Melhores parâmetros na Validação: {'max_depth': 6, 'min_samples_leaf': 1, 'criterion': 'entropy', 'random_state': 42} (Acurácia: 0.8710)
+Desempenho no Teste final:
+Acurácia treino: 0.9302 | Acurácia teste: 0.8602
+Precision: 0.6673
+Recall: 0.6667
+F-Measure: 0.6532
+Tempo treino: 0.0011s | Tempo predição: 0.0004s
+
+--- K-Means | Abordagem 2 (Features Extraídas) ---
+Melhores parâmetros na Validação: {'n_clusters': 32, 'random_state': 42} (Acurácia: 0.8710)
+Desempenho no Teste final:
+Acurácia treino: 0.9302 | Acurácia teste: 0.8817
+Precision: 0.6746
+Recall: 0.6833
+F-Measure: 0.6702
+Tempo treino: 0.0235s | Tempo predição: 0.0002s
+
+--- Random Forest | Abordagem 2 (Features Extraídas) ---
+Melhores parâmetros na Validação: {'n_estimators': 50, 'max_depth': 5, 'min_samples_leaf': 1, 'random_state': 42} (Acurácia: 0.8710)
+Desempenho no Teste final:
+Acurácia treino: 0.9302 | Acurácia teste: 0.8495
+Precision: 0.6602
+Recall: 0.6583
+F-Measure: 0.6432
+Tempo treino: 0.0317s | Tempo predição: 0.0022s
 
