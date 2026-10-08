@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 import random
+import tkinter as tk
+from tkinter import messagebox
 
 random.seed(42)  # fixa a simulacao de "Tem jogo" para os resultados serem reproduziveis
 from sklearn.model_selection import train_test_split
@@ -371,3 +373,165 @@ for nome_ab, dados in abordagens.items():
         modelo, resultado = avaliar_modelo(nome_alg, construtor, grade, X_tr, y_train, X_v, y_val, X_te, y_test, nome_ab)
         resultados_modelos.append(resultado)
         modelos_treinados[(nome_alg, nome_ab)] = modelo
+
+class JogoDaVelhaGUI:
+    def __init__(self, master, modelo_ia, scaler, colunas_features):
+        self.master = master
+        self.master.title("Tic-Tac-Toe IA - T1")
+        self.master.geometry("400x600")
+        
+        self.modelo_ia = modelo_ia
+        self.scaler = scaler
+        self.colunas_features = colunas_features
+        
+        self.tab = [0] * 9
+        self.botoes = []
+        
+        self.acertos_ia = 0
+        self.total_predicoes = 0
+        
+        # Trava para impedir cliques rápidos do humano
+        self.bloqueado = False 
+        
+        # Frame do Tabuleiro
+        frame_tab = tk.Frame(master)
+        frame_tab.pack(pady=10)
+        
+        for i in range(9):
+            btn = tk.Button(frame_tab, text="", font=('Helvetica', 24, 'bold'), width=5, height=2,
+                            command=lambda i=i: self.jogada_humano(i))
+            btn.grid(row=i//3, column=i%3, padx=5, pady=5)
+            self.botoes.append(btn)
+            
+        # Frame de Informações e Score
+        frame_status = tk.Frame(master)
+        frame_status.pack(pady=10)
+        
+        self.lbl_status = tk.Label(frame_status, text="Sua vez! Jogue com o X", font=('Helvetica', 12, 'bold'))
+        self.lbl_status.pack()
+        
+        self.lbl_ia = tk.Label(frame_status, text="Previsão da IA: Aguardando...", font=('Helvetica', 11), fg="blue")
+        self.lbl_ia.pack(pady=5)
+        
+        self.lbl_score = tk.Label(frame_status, text="Acurácia da IA: 0.00%", font=('Helvetica', 11))
+        self.lbl_score.pack(pady=5)
+
+        # Botão de Reiniciar
+        self.btn_reiniciar = tk.Button(frame_status, text="Reiniciar Partida", font=('Helvetica', 10, 'bold'), 
+                                       command=self.reiniciar_jogo, state="disabled")
+        self.btn_reiniciar.pack(pady=10)
+
+    def reiniciar_jogo(self):
+        self.tab = [0] * 9
+        self.bloqueado = False # Libera a interface ao reiniciar
+        
+        for btn in self.botoes:
+            btn.config(text="", state="normal")
+        
+        self.lbl_status.config(text="Sua vez! Jogue com o X")
+        self.lbl_ia.config(text="Previsão da IA: Aguardando...")
+        self.btn_reiniciar.config(state="disabled")
+
+    def jogada_humano(self, idx):
+        # Se estiver bloqueado ou a casa ocupada, ignora o clique
+        if self.bloqueado or self.tab[idx] != 0:
+            return
+        
+        # Bloqueia cliques imediatamente
+        self.bloqueado = True 
+        
+        self.tab[idx] = 1
+        self.botoes[idx].config(text="X", state="disabled", disabledforeground="black")
+        self.master.update_idletasks()
+        
+        if self.processar_turno():
+            self.lbl_status.config(text="Máquina pensando...")
+            self.master.after(500, self.jogada_maquina)
+
+    def jogada_maquina(self):
+        posicoes_vazias = [i for i, v in enumerate(self.tab) if v == 0]
+        if not posicoes_vazias:
+            return
+            
+        jogada_escolhida = None
+
+        # # 1. Inteligência da Máquina: Tenta ganhar
+        # for pos in posicoes_vazias:
+        #     self.tab[pos] = -1
+        #     if avaliar_tabuleiro(self.tab) == 'Jogador O venceu':
+        #         jogada_escolhida = pos
+        #     self.tab[pos] = 0
+        #     if jogada_escolhida is not None:
+        #         break
+
+        # # 2. Inteligência da Máquina: Tenta bloquear o X
+        # if jogada_escolhida is None:
+        #     for pos in posicoes_vazias:
+        #         self.tab[pos] = 1
+        #         if avaliar_tabuleiro(self.tab) == 'Jogador X venceu':
+        #             jogada_escolhida = pos
+        #         self.tab[pos] = 0
+        #         if jogada_escolhida is not None:
+        #             break
+
+        # 3. Inteligência da Máquina: Joga aleatório
+        if jogada_escolhida is None:
+            jogada_escolhida = random.choice(posicoes_vazias)
+
+        self.tab[jogada_escolhida] = -1
+        self.botoes[jogada_escolhida].config(text="O", state="disabled", disabledforeground="red")
+        self.master.update_idletasks()
+        
+        self.lbl_status.config(text="Sua vez! Jogue com o X")
+        
+        # Só libera o botão para o humano se o jogo não tiver acabado
+        if self.processar_turno():
+            self.bloqueado = False
+
+    def processar_turno(self):
+        features = extrair_features(self.tab)
+        df_instancia = pd.DataFrame([features.values], columns=self.colunas_features)
+        features_norm = self.scaler.transform(df_instancia)
+        
+        estado_ia = self.modelo_ia.predict(features_norm)[0]
+        estado_real = avaliar_tabuleiro(self.tab)
+        
+        self.total_predicoes += 1
+        if estado_ia == estado_real:
+            self.acertos_ia += 1
+            
+        acc = (self.acertos_ia / self.total_predicoes) * 100
+        
+        self.lbl_ia.config(text=f"Previsão da IA: {estado_ia}\nEstado Real: {estado_real}")
+        self.lbl_score.config(text=f"Acurácia da IA: {acc:.2f}% ({self.acertos_ia}/{self.total_predicoes})")
+        
+        if estado_ia == 'Tem jogo' and estado_real != 'Tem jogo':
+            messagebox.showwarning("Erro da IA", f"REGRA DO ENUNCIADO:\n\nA IA não detectou o fim de jogo (previu 'Tem jogo').\nRealidade: {estado_real}\n\nEncerrando a partida prematuramente.")
+            self.desativar_botoes()
+            return False
+            
+        if estado_ia != 'Tem jogo' and estado_real == 'Tem jogo':
+            messagebox.showinfo("Falso Fim de Jogo", f"REGRA DO ENUNCIADO:\n\nA IA detectou incorretamente o fim de jogo (previu '{estado_ia}').\nRealidade: O jogo não acabou.\n\nA partida continuará normalmente.")
+            return True
+            
+        if estado_real != 'Tem jogo':
+            messagebox.showinfo("Fim de Jogo", f"O jogo acabou.\n\nResultado final correto: {estado_real}\nPrevisão da IA: {estado_ia}")
+            self.desativar_botoes()
+            return False
+            
+        return True
+
+    def desativar_botoes(self):
+        self.bloqueado = True
+        for btn in self.botoes:
+            btn.config(state="disabled")
+        self.btn_reiniciar.config(state="normal")
+        
+        # Inicialização do Front-End
+if __name__ == "__main__":
+    # Garante que o modelo escolhido será a MLP com a Abordagem 2
+    modelo_escolhido = modelos_treinados[('MLP', 'Abordagem 2 (Features Extraídas)')]
+    
+    janela_principal = tk.Tk()
+    app = JogoDaVelhaGUI(janela_principal, modelo_escolhido, scaler2, colunas_features)
+    janela_principal.mainloop()
